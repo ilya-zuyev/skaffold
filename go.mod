@@ -43,6 +43,7 @@ require (
 	github.com/google/go-cmp v0.4.1
 	github.com/google/go-containerregistry v0.1.1
 	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/slowjam v1.0.0
 	github.com/google/uuid v1.1.1
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3
 	github.com/heroku/color v0.0.6
