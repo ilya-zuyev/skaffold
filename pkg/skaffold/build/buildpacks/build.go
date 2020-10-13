@@ -21,12 +21,16 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
 // Build builds an artifact with Cloud Native Buildpacks:
 // https://buildpacks.io/
 func (b *Builder) Build(ctx context.Context, out io.Writer, artifact *latest.Artifact, tag string) (string, error) {
+	ctx, st := perf.OTSpan(ctx, "buildpacks.Builder.Build")
+	defer st()
+
 	built, err := b.build(ctx, out, artifact, tag)
 	if err != nil {
 		return "", err

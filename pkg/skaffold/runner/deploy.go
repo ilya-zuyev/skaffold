@@ -32,9 +32,13 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/event"
 	kubernetesclient "github.com/GoogleContainerTools/skaffold/pkg/skaffold/kubernetes/client"
 	kubectx "github.com/GoogleContainerTools/skaffold/pkg/skaffold/kubernetes/context"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 )
 
 func (r *SkaffoldRunner) Deploy(ctx context.Context, out io.Writer, artifacts []build.Artifact) error {
+	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.Deploy")
+	defer st()
+
 	if r.runCtx.RenderOnly() {
 		return r.Render(ctx, out, artifacts, false, r.runCtx.RenderOutput())
 	}

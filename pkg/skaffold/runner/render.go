@@ -24,9 +24,12 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/build"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/color"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/docker"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 )
 
 func (r *SkaffoldRunner) Render(ctx context.Context, out io.Writer, builds []build.Artifact, offline bool, filepath string) error {
+	defer perf.LogSpan(fmt.Sprintf("#render %s", perf.Wd()))()
+
 	//Fetch the digest and append it to the tag with the format of "tag@digest"
 	if r.runCtx.DigestSource() == remoteDigestSource {
 		for i, a := range builds {

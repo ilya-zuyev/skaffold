@@ -29,11 +29,20 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/build/tag"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/color"
 	deployutil "github.com/GoogleContainerTools/skaffold/pkg/skaffold/deploy/util"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
 // BuildAndTest builds and tests a list of artifacts.
 func (r *SkaffoldRunner) BuildAndTest(ctx context.Context, out io.Writer, artifacts []*latest.Artifact) ([]build.Artifact, error) {
+	defer perf.LogSpan(fmt.Sprintf("#build-and-test %s", perf.Wd()))()
+	if sp, err := perf.Span("build-" + perf.Wd()); err == nil {
+		defer sp()
+	}
+
+	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.BuildAndTest")
+	defer st()
+
 	// Use tags directly from the Kubernetes manifests.
 	if r.runCtx.DigestSource() == noneDigestSource {
 		return []build.Artifact{}, nil
@@ -62,6 +71,9 @@ func (r *SkaffoldRunner) BuildAndTest(ctx context.Context, out io.Writer, artifa
 	}
 
 	bRes, err := r.cache.Build(ctx, out, tags, artifacts, func(ctx context.Context, out io.Writer, tags tag.ImageTags, artifacts []*latest.Artifact) ([]build.Artifact, error) {
+		ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.BuildAndTest [internal]")
+		defer st()
+
 		if len(artifacts) == 0 {
 			return nil, nil
 		}
@@ -96,6 +108,13 @@ func (r *SkaffoldRunner) BuildAndTest(ctx context.Context, out io.Writer, artifa
 
 // DeployAndLog deploys a list of already built artifacts and optionally show the logs.
 func (r *SkaffoldRunner) DeployAndLog(ctx context.Context, out io.Writer, artifacts []build.Artifact) error {
+	defer perf.LogSpan(fmt.Sprintf("#deploy-and-log %s", perf.Wd()))()
+	if sp, err := perf.Span("deploy-" + perf.Wd()); err == nil {
+		defer sp()
+	}
+	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.DeployAndLog")
+	defer st()
+
 	// Update which images are logged.
 	r.addTagsToPodSelector(artifacts)
 
@@ -149,6 +168,9 @@ func (r *SkaffoldRunner) ApplyDefaultRepo(tag string) (string, error) {
 
 // imageTags generates tags for a list of artifacts
 func (r *SkaffoldRunner) imageTags(ctx context.Context, out io.Writer, artifacts []*latest.Artifact) (tag.ImageTags, error) {
+	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.imageTags")
+	defer st()
+
 	start := time.Now()
 	color.Default.Fprintln(out, "Generating tags...")
 

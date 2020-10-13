@@ -18,9 +18,13 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"io"
+
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 )
 
 func (r *SkaffoldRunner) Prune(ctx context.Context, out io.Writer) error {
+	defer perf.LogSpan(fmt.Sprintf("#prune %s", perf.Wd()))()
 	return r.builder.Prune(ctx, out)
 }

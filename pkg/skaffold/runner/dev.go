@@ -50,9 +50,14 @@ var (
 
 func (r *SkaffoldRunner) doDev(ctx context.Context, out io.Writer, logger *kubernetes.LogAggregator, forwarderManager portforward.Forwarder) error {
 
-	if stop, err := perf.Span(fmt.Sprintf("devloop_%02d", r.devIteration)); err == nil {
-		defer stop()
+	stop, err := perf.Span(fmt.Sprintf("devloop_%02d", r.devIteration))
+	if err != nil {
+		logrus.Warnf("some profilers failed to start: %v", err)
 	}
+	defer stop()
+
+	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.doDev")
+	defer st()
 
 	if r.changeSet.needsReload {
 		return ErrorConfigurationChanged
@@ -133,6 +138,11 @@ func (r *SkaffoldRunner) doDev(ctx context.Context, out io.Writer, logger *kuber
 // Dev watches for changes and runs the skaffold build and deploy
 // config until interrupted by the user.
 func (r *SkaffoldRunner) Dev(ctx context.Context, out io.Writer, artifacts []*latest.Artifact) error {
+	defer perf.LogSpan(fmt.Sprintf("#dev %s", perf.Wd()))()
+
+	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.Dev")
+	defer st()
+
 	event.DevLoopInProgress(r.devIteration)
 	defer func() { r.devIteration++ }()
 

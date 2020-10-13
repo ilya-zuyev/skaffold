@@ -37,6 +37,7 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/docker"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/filemon"
 	kubernetesclient "github.com/GoogleContainerTools/skaffold/pkg/skaffold/kubernetes/client"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/util"
 )
@@ -247,6 +248,9 @@ func matchSyncRules(syncRules []*latest.SyncRule, relPath, containerWd string) (
 }
 
 func (s *podSyncer) Sync(ctx context.Context, item *Item) error {
+	ctx, st := perf.OTSpan(ctx, "sync.podSyncer.Sync")
+	defer st()
+
 	if len(item.Copy) > 0 {
 		logrus.Infoln("Copying files:", item.Copy, "to", item.Image)
 

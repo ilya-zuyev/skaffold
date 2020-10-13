@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/GoogleContainerTools/skaffold/cmd/skaffold/app/tips"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/runner"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
@@ -42,6 +43,11 @@ func NewCmdRun() *cobra.Command {
 
 func doRun(ctx context.Context, out io.Writer) error {
 	return withRunner(ctx, func(r runner.Runner, config *latest.SkaffoldConfig) error {
+		defer perf.LogSpan(fmt.Sprintf("#run %s", perf.Wd()))()
+
+		ctx, sp := perf.OTSpan(ctx, "doRun-"+perf.Wd())
+		defer sp()
+
 		bRes, err := r.BuildAndTest(ctx, out, targetArtifacts(opts, config))
 		if err != nil {
 			return fmt.Errorf("failed to build: %w", err)

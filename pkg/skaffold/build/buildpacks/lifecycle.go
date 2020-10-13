@@ -31,6 +31,7 @@ import (
 	"github.com/buildpacks/pack/project"
 
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/docker"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
@@ -119,7 +120,12 @@ func runPackBuild(ctx context.Context, out io.Writer, localDocker docker.LocalDa
 		return fmt.Errorf("unable to create pack client: %w", err)
 	}
 
-	err = packClient.Build(ctx, opts)
+	err = func(ctx context.Context) error {
+		ctx, sp := perf.OTSpan(ctx, "buildpacks.runPackBuild")
+		defer sp()
+		return packClient.Build(ctx, opts)
+	}(ctx)
+
 	// pack turns exit codes from the lifecycle into `failed with status code: N`
 	if err != nil {
 		err = rewriteLifecycleStatusCode(err)

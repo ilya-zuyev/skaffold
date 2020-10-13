@@ -29,10 +29,14 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/color"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/docker"
 	sErrors "github.com/GoogleContainerTools/skaffold/pkg/skaffold/errors"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
 func (c *cache) Build(ctx context.Context, out io.Writer, tags tag.ImageTags, artifacts []*latest.Artifact, buildAndTest BuildAndTestFn) ([]build.Artifact, error) {
+	ctx, st := perf.OTSpan(ctx, "cache.cache.Build")
+	defer st()
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 

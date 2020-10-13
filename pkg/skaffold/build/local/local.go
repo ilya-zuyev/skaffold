@@ -32,12 +32,16 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/build/tag"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/color"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/config"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
 // Build runs a docker build on the host and tags the resulting image with
 // its checksum. It streams build progress to the writer argument.
 func (b *Builder) Build(ctx context.Context, out io.Writer, tags tag.ImageTags, artifacts []*latest.Artifact) ([]build.Artifact, error) {
+	ctx, st := perf.OTSpan(ctx, "local.Builder.Build")
+	defer st()
+
 	if b.localCluster {
 		color.Default.Fprintf(out, "Found [%s] context, using local docker daemon.\n", b.kubeContext)
 	}

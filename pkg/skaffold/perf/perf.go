@@ -1,14 +1,21 @@
 package perf
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
+	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/google/slowjam/pkg/stacklog"
+	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/sdk/trace"
+
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
 type SlowJamSpan struct {
@@ -18,14 +25,26 @@ type SlowJamSpan struct {
 
 const sjEnv = "SJ_PROFILE"
 const pprofEnv = "PP_PROFILE"
+const execEnv = "EXEC_PROFILE"
+
 const profPathEnv = "PROF_PATH"
+const otelGcpProjEnv = "OT_GCP_PROJ"
 
 var sjEnabled = false
+var execEnabled = false
 var ppEnabled = false
 
 var started = int64(0)
 
+type execLogEntry struct {
+	msg  string
+	span string
+}
+
+var execLog = make(chan execLogEntry, 32)
+
 var profPath = "."
+var lastSpan = ""
 
 func init() {
 	if v, ok := os.LookupEnv(sjEnv); ok {
@@ -38,17 +57,87 @@ func init() {
 			ppEnabled = true
 		}
 	}
+	if v, ok := os.LookupEnv(execEnv); ok {
+		if v != "0" {
+			execEnabled = true
+		}
+	}
 
-	if sjEnabled || ppEnabled {
+	if sjEnabled || ppEnabled || execEnabled {
 		if p, ok := os.LookupEnv(profPathEnv); ok {
 			profPath = p
 		}
 	}
+
+	if execEnabled {
+		f, err := os.Create(profileFile("exec", "log"))
+		if err != nil {
+			logrus.Warnf("failed to create logexec file: %v", err)
+			execEnabled = false
+		} else {
+			go func() {
+				for e := range execLog {
+					fmt.Fprintf(f, "%v [%s] %s\n", fmtTime(time.Now()), e.span, e.msg)
+				}
+			}()
+		}
+	}
+
+	if gcpProj, ok := os.LookupEnv(otelGcpProjEnv); ok {
+		// start otel exporter
+		gexp, err := texporter.NewExporter(texporter.WithProjectID(gcpProj))
+		if err != nil {
+			panic(err)
+		}
+		gtp := trace.NewTracerProvider(trace.WithSyncer(gexp))
+		global.SetTracerProvider(gtp)
+	}
+
+	//jFlush, _ = jaeger.InstallNewPipeline(
+	//	jaeger.WithCollectorEndpoint("http://localhost:14268/api/traces"),
+	//	jaeger.WithProcess(jaeger.Process{
+	//		ServiceName: "skaffold-perf2",
+	//		Tags: []label.KeyValue{
+	//			label.String("exporter", "jaaaeger"),
+	//			label.String("boom", "42"),
+	//		},
+	//	}),
+	//	jaeger.WithSDK(&trace.Config{
+	//		DefaultSampler: trace.AlwaysSample(),
+	//	}))
+}
+
+var jFlush = noStop
+
+func fmtTime(t time.Time) string {
+	return t.Format("Mon Jan 2 15:04:05 MST 2006")
 }
 
 type StopFunc func()
 
 func noStop() {}
+
+func Wd() string {
+	if wd, err := os.Getwd(); err != nil {
+		return "<error>"
+	} else {
+		pth := strings.Split(wd, string(filepath.Separator))
+		return pth[len(pth)-1]
+	}
+}
+
+func LogSpan(comm string) StopFunc {
+	if !execEnabled {
+		return noStop
+	}
+	t0 := time.Now()
+	sp := lastSpan
+	execLog <- execLogEntry{fmt.Sprintf("Started [%s]", comm), sp}
+	return func() {
+		dt := time.Since(t0)
+		execLog <- execLogEntry{fmt.Sprintf("   Done [%s]. Took: %v. Started at %v", comm, dt, fmtTime(t0)), sp}
+	}
+}
 
 func startSJSpan(span string) (StopFunc, error) {
 	if !sjEnabled {
@@ -88,6 +177,14 @@ func startPprofSpan(span string) (StopFunc, error) {
 	}, nil
 }
 
+func OTSpan(ctx context.Context, name string) (context.Context, StopFunc) {
+	tr := global.Tracer("foo")
+	traceCtx, stop := tr.Start(ctx, name)
+	return traceCtx, func() {
+		stop.End()
+	}
+}
+
 func Span(span string) (StopFunc, error) {
 	if !sjEnabled && !ppEnabled {
 		return noStop, nil
@@ -109,6 +206,8 @@ func Span(span string) (StopFunc, error) {
 	}
 	if !startedOk {
 		atomic.StoreInt64(&started, 0)
+	} else {
+		lastSpan = span
 	}
 
 	if err1 != nil || err2 != nil {
@@ -120,5 +219,7 @@ func Span(span string) (StopFunc, error) {
 		if startedOk {
 			atomic.StoreInt64(&started, 0)
 		}
+		jFlush()
+		lastSpan = ""
 	}, rtErr
 }

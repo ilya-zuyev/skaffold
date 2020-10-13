@@ -28,6 +28,7 @@ import (
 
 	"github.com/GoogleContainerTools/skaffold/cmd/skaffold/app/flags"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/config"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/runner"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
@@ -67,6 +68,9 @@ func doBuild(ctx context.Context, out io.Writer) error {
 	}
 
 	return withRunner(ctx, func(r runner.Runner, config *latest.SkaffoldConfig) error {
+		ctx, sp := perf.OTSpan(ctx, "doBuild "+perf.Wd())
+		defer sp()
+
 		bRes, err := r.BuildAndTest(ctx, buildOut, targetArtifacts(opts, config))
 
 		if quietFlag || buildOutputFlag != "" {

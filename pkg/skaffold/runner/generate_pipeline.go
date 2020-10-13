@@ -24,12 +24,15 @@ import (
 
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/color"
 	pipeline "github.com/GoogleContainerTools/skaffold/pkg/skaffold/generate_pipeline"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/defaults"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
 func (r *SkaffoldRunner) GeneratePipeline(ctx context.Context, out io.Writer, config *latest.SkaffoldConfig, configPaths []string, fileOut string) error {
+	defer perf.LogSpan(fmt.Sprintf("#gen-pipeline %s", perf.Wd()))()
+
 	// Keep track of files, configs, and profiles. This will be used to know which files to write
 	// profiles to and what flags to add to task commands
 	baseConfig := []*pipeline.ConfigFile{

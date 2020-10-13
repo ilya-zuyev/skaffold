@@ -25,6 +25,7 @@ import (
 	"github.com/buildpacks/imgutil/local"
 
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/docker"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 )
 
 type fetcher struct {
@@ -40,6 +41,9 @@ func newFetcher(out io.Writer, docker docker.LocalDaemon) *fetcher {
 }
 
 func (f *fetcher) Fetch(ctx context.Context, name string, _, pull bool) (imgutil.Image, error) {
+	ctx, sp := perf.OTSpan(ctx, "buildpacks.fetcher.Fetch "+name)
+	defer sp()
+
 	if pull {
 		if err := f.docker.Pull(ctx, f.out, name); err != nil {
 			return nil, err

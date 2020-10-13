@@ -18,9 +18,14 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"io"
+
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 )
 
 func (r *SkaffoldRunner) Cleanup(ctx context.Context, out io.Writer) error {
+	defer perf.LogSpan(fmt.Sprintf("#cleanup %s", perf.Wd()))()
+
 	return r.deployer.Cleanup(ctx, out)
 }

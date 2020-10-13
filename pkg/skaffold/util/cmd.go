@@ -22,6 +22,8 @@ import (
 	"os/exec"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 )
 
 type cmdError struct {
@@ -57,10 +59,12 @@ type Command interface {
 }
 
 func RunCmdOut(cmd *exec.Cmd) ([]byte, error) {
+	defer perf.LogSpan(cmd.String())()
 	return DefaultExecCommand.RunCmdOut(cmd)
 }
 
 func RunCmd(cmd *exec.Cmd) error {
+	defer perf.LogSpan(cmd.String())()
 	return DefaultExecCommand.RunCmd(cmd)
 }
 

@@ -40,6 +40,7 @@ import (
 
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/config"
 	sErrors "github.com/GoogleContainerTools/skaffold/pkg/skaffold/errors"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/util"
 )
@@ -168,6 +169,11 @@ func (l *localDaemon) CheckCompatible(a *latest.DockerArtifact) error {
 
 // Build performs a docker build and returns the imageID.
 func (l *localDaemon) Build(ctx context.Context, out io.Writer, workspace string, a *latest.DockerArtifact, ref string, mode config.RunMode) (string, error) {
+	defer perf.LogSpan("docker.localDaemon.Build " + a.DockerfilePath)()
+
+	ctx, st := perf.OTSpan(ctx, "docker.localDaemon.Build")
+	defer st()
+
 	logrus.Debugf("Running docker build: context: %s, dockerfile: %s", workspace, a.DockerfilePath)
 
 	if err := l.CheckCompatible(a); err != nil {
