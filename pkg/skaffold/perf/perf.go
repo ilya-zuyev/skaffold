@@ -126,19 +126,6 @@ func Wd() string {
 	}
 }
 
-func LogSpan(comm string) StopFunc {
-	if !execEnabled {
-		return noStop
-	}
-	t0 := time.Now()
-	sp := lastSpan
-	execLog <- execLogEntry{fmt.Sprintf("Started [%s]", comm), sp}
-	return func() {
-		dt := time.Since(t0)
-		execLog <- execLogEntry{fmt.Sprintf("   Done [%s]. Took: %v. Started at %v", comm, dt, fmtTime(t0)), sp}
-	}
-}
-
 func startSJSpan(span string) (StopFunc, error) {
 	if !sjEnabled {
 		return noStop, nil
@@ -185,7 +172,7 @@ func OTSpan(ctx context.Context, name string) (context.Context, StopFunc) {
 	}
 }
 
-func Span(span string) (StopFunc, error) {
+func ProfSpan(span string) (StopFunc, error) {
 	if !sjEnabled && !ppEnabled {
 		return noStop, nil
 	}

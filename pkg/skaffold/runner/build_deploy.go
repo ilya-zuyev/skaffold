@@ -35,11 +35,9 @@ import (
 
 // BuildAndTest builds and tests a list of artifacts.
 func (r *SkaffoldRunner) BuildAndTest(ctx context.Context, out io.Writer, artifacts []*latest.Artifact) ([]build.Artifact, error) {
-	defer perf.LogSpan(fmt.Sprintf("#build-and-test %s", perf.Wd()))()
-	if sp, err := perf.Span("build-" + perf.Wd()); err == nil {
+	if sp, err := perf.ProfSpan("build-" + perf.Wd()); err == nil {
 		defer sp()
 	}
-
 	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.BuildAndTest")
 	defer st()
 
@@ -108,8 +106,7 @@ func (r *SkaffoldRunner) BuildAndTest(ctx context.Context, out io.Writer, artifa
 
 // DeployAndLog deploys a list of already built artifacts and optionally show the logs.
 func (r *SkaffoldRunner) DeployAndLog(ctx context.Context, out io.Writer, artifacts []build.Artifact) error {
-	defer perf.LogSpan(fmt.Sprintf("#deploy-and-log %s", perf.Wd()))()
-	if sp, err := perf.Span("deploy-" + perf.Wd()); err == nil {
+	if sp, err := perf.ProfSpan("deploy-" + perf.Wd()); err == nil {
 		defer sp()
 	}
 	ctx, st := perf.OTSpan(ctx, "runner.SkaffoldRunner.DeployAndLog")

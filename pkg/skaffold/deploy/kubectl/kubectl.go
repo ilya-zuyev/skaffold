@@ -36,6 +36,7 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/event"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/kubernetes"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/kubernetes/manifest"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/util"
 )
@@ -82,6 +83,13 @@ func NewDeployer(cfg Config, labels map[string]string) (*Deployer, error) {
 // Deploy templates the provided manifests with a simple `find and replace` and
 // runs `kubectl apply` on those manifests
 func (k *Deployer) Deploy(ctx context.Context, out io.Writer, builds []build.Artifact) ([]string, error) {
+	var imgs []string
+	for _, a := range builds {
+		imgs = append(imgs, a.ImageName)
+	}
+	ctx, sp := perf.OTSpan(ctx, "kubectl.Depoyer.Deploy "+strings.Join(imgs, ","))
+	defer sp()
+
 	var (
 		manifests manifest.ManifestList
 		err       error

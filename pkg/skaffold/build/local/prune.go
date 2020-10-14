@@ -27,6 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/docker"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
@@ -105,6 +106,9 @@ func (p *pruner) isPruned(id string) bool {
 }
 
 func (p *pruner) runPrune(ctx context.Context, ids []string) error {
+	ctx, st := perf.OTSpan(ctx, "local.pruner.runPrune")
+	defer st()
+
 	logrus.Debugf("Going to prune: %v", ids)
 	// docker API does not support concurrent prune/utilization info request
 	// so let's serialize the access to it

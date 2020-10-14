@@ -17,6 +17,7 @@ limitations under the License.
 package util
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
@@ -59,12 +60,15 @@ type Command interface {
 }
 
 func RunCmdOut(cmd *exec.Cmd) ([]byte, error) {
-	defer perf.LogSpan(cmd.String())()
+	_, sp := perf.OTSpan(context.Background(), "util.RunCmdOut "+cmd.Path)
+	defer sp()
+
 	return DefaultExecCommand.RunCmdOut(cmd)
 }
 
 func RunCmd(cmd *exec.Cmd) error {
-	defer perf.LogSpan(cmd.String())()
+	_, sp := perf.OTSpan(context.Background(), "util.RunCmd "+cmd.Path)
+	defer sp()
 	return DefaultExecCommand.RunCmd(cmd)
 }
 

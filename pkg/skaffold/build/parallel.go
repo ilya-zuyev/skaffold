@@ -26,6 +26,7 @@ import (
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/build/tag"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/color"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/event"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 )
 
@@ -88,6 +89,9 @@ func InParallel(ctx context.Context, out io.Writer, tags tag.ImageTags, artifact
 }
 
 func runBuild(ctx context.Context, cw io.WriteCloser, tags tag.ImageTags, artifact *latest.Artifact, results *sync.Map, build ArtifactBuilder) {
+	ctx, st := perf.OTSpan(ctx, "build.runBuild "+artifact.ImageName)
+	defer st()
+
 	event.BuildInProgress(artifact.ImageName)
 
 	finalTag, err := getBuildResult(ctx, cw, tags, artifact, build)

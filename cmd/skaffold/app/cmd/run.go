@@ -43,9 +43,7 @@ func NewCmdRun() *cobra.Command {
 
 func doRun(ctx context.Context, out io.Writer) error {
 	return withRunner(ctx, func(r runner.Runner, config *latest.SkaffoldConfig) error {
-		defer perf.LogSpan(fmt.Sprintf("#run %s", perf.Wd()))()
-
-		ctx, sp := perf.OTSpan(ctx, "doRun-"+perf.Wd())
+		ctx, sp := perf.OTSpan(ctx, "cmd.doRun"+perf.Wd())
 		defer sp()
 
 		bRes, err := r.BuildAndTest(ctx, out, targetArtifacts(opts, config))
