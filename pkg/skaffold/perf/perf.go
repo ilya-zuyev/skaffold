@@ -164,9 +164,13 @@ func startPprofSpan(span string) (StopFunc, error) {
 	}, nil
 }
 
+// an ugly hack to keep the last used OT contextz
+var LastOTCtx = context.Background()
+
 func OTSpan(ctx context.Context, name string) (context.Context, StopFunc) {
 	tr := global.Tracer("foo")
 	traceCtx, stop := tr.Start(ctx, name)
+	LastOTCtx = ctx
 	return traceCtx, func() {
 		stop.End()
 	}

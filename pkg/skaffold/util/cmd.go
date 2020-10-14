@@ -17,10 +17,10 @@ limitations under the License.
 package util
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 
@@ -60,14 +60,14 @@ type Command interface {
 }
 
 func RunCmdOut(cmd *exec.Cmd) ([]byte, error) {
-	_, sp := perf.OTSpan(context.Background(), "util.RunCmdOut "+cmd.Path)
+	_, sp := perf.OTSpan(perf.LastOTCtx, fmt.Sprintf("util.RunCmdOut %s %s", cmd.Path, strings.Join(cmd.Args, " ")))
 	defer sp()
 
 	return DefaultExecCommand.RunCmdOut(cmd)
 }
 
 func RunCmd(cmd *exec.Cmd) error {
-	_, sp := perf.OTSpan(context.Background(), "util.RunCmd "+cmd.Path)
+	_, sp := perf.OTSpan(perf.LastOTCtx, fmt.Sprintf("util.RunCmd %s %s", cmd.Path, strings.Join(cmd.Args, " ")))
 	defer sp()
 	return DefaultExecCommand.RunCmd(cmd)
 }

@@ -25,12 +25,16 @@ import (
 
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/config"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/docker"
+	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/perf"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/latest"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/util"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/warnings"
 )
 
 func (b *Builder) buildDocker(ctx context.Context, out io.Writer, a *latest.Artifact, tag string, mode config.RunMode) (string, error) {
+	ctx, sp := perf.OTSpan(ctx, fmt.Sprintf("local.builder.buildDocker %s", a.ImageName))
+	defer sp()
+
 	// Fail fast if the Dockerfile can't be found.
 	dockerfile, err := docker.NormalizeDockerfilePath(a.Workspace, a.DockerArtifact.DockerfilePath)
 	if err != nil {
