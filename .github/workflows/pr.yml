@@ -15,24 +15,30 @@ jobs:
   build_master:
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/setup-go@v2
-      with:
-        go-version: '1.15.5'
-        stable: true
-    - name: checkout master
-      uses: actions/checkout@v2
-      with:
-        ref: master
-    - name: Download Dependencies
-      run: go mod download
-    - name: Build Binaries
-      run: |
-        git branch --show-current
-        make benchmark
-    - uses: actions/upload-artifact@v1
-      with:
-        name: skaffold_master
-        path: out/
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.15.5'
+          stable: true
+      - name: checkout master
+        uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: Download Dependencies
+        run: go mod download
+      - name: Install Minikube and start cluster
+        run: |
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
+          sudo install minikube /usr/local/bin/minikube
+          minikube start --profile=minikube --driver=docker
+      - name: Build and benchmark
+        run: |
+          git branch --show-current
+          make benchmark
+      - uses: actions/upload-artifact@v1
+        name: Upload benchmark report
+        with:
+          name: skaffold_master
+          path: out/
 
   build_branch:
     runs-on: ubuntu-18.04
@@ -45,7 +51,12 @@ jobs:
         uses: actions/checkout@v2
       - name: Download Dependencies
         run: go mod download
-      - name: Build Binaries
+      - name: Install Minikube and start cluster
+        run: |
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
+          sudo install minikube /usr/local/bin/minikube
+          minikube start --profile=minikube --driver=docker
+      - name: Build and benchmark
         run: |
           git branch --show-current
           make benchmark
