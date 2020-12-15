@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: '1.15.5'
+        go-version: '1.16'
         stable: true
     - name: checkout master
       uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
     - name: Build Binaries
       run: |
         git branch --show-current
-        make
+        make benchmark
     - uses: actions/upload-artifact@v1
       with:
         name: skaffold_master
@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.15.5'
+          go-version: '1.16'
           stable: true
       - name: checkout branch
         uses: actions/checkout@v2
@@ -48,8 +48,43 @@ jobs:
       - name: Build Binaries
         run: |
           git branch --show-current
-          make
+          make benchmark
       - uses: actions/upload-artifact@v1
         with:
           name: skaffold_branch
           path: out/
+
+  benchmark:
+    needs: [build_branch, build_master]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+          stable: true
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: skaffold_branch
+          path: bench_master/
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: skaffold_branch
+          path: bench_branch/
+
+      - name: Compare benchmarks
+        run: |
+          benchstat -delta-test none -html bench_master/benchmark bench_branch/benchmark > benchdelta.html
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: benchdelta
+          path: benchdelta.html
+
+      - name: comment PR
+        uses: machine-learning-apps/pr-comment@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: benchdelta.html

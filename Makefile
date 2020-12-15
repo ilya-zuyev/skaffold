@@ -281,3 +281,8 @@ generate-schemas:
 
 $(STATIK_FILES): go.mod docs/content/en/schemas/*
 	hack/generate-statik.sh
+
+.PHONY: benchmark
+benchmark: $(BUILD_DIR)/$(PROJECT)
+	go test -bench=. ./pkg/skaffold/perf/... -dir=$(shell pwd) -binary="out/skaffold" > $(BUILD_DIR)/benchmark.result
+
