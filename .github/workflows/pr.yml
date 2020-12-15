@@ -9,11 +9,11 @@ on:
 env:
   GOPROXY: https://proxy.golang.org
 
+
 jobs:
-  # Runs before all other jobs
-  # builds the minikube binaries
+
   build_master:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v2
         with:
@@ -41,7 +41,7 @@ jobs:
           path: out/
 
   build_branch:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v2
         with:
@@ -65,9 +65,10 @@ jobs:
           name: skaffold_branch
           path: out/
 
+
   benchmark:
     needs: [build_branch, build_master]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v2
         with:
