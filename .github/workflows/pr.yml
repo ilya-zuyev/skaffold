@@ -19,22 +19,20 @@ jobs:
       with:
         go-version: '1.15.5'
         stable: true
-
-      - name: checkout master
-        uses: actions/checkout@v2
-        with:
-          ref: master
-
-      - name: Download Dependencies
-        run: go mod download
-
-      - name: Build Binaries
-        run: |
-          make
-      - uses: actions/upload-artifact@v1
-        with:
-          name: skaffold_master
-          path: out/
+    - name: checkout master
+      uses: actions/checkout@v2
+      with:
+        ref: master
+    - name: Download Dependencies
+      run: go mod download
+    - name: Build Binaries
+      run: |
+        git branch --show-current
+        make
+    - uses: actions/upload-artifact@v1
+      with:
+        name: skaffold_master
+        path: out/
 
   build_branch:
     runs-on: ubuntu-18.04
@@ -43,15 +41,13 @@ jobs:
         with:
           go-version: '1.15.5'
           stable: true
-
       - name: checkout branch
         uses: actions/checkout@v2
-
       - name: Download Dependencies
         run: go mod download
-
       - name: Build Binaries
         run: |
+          git branch --show-current
           make
       - uses: actions/upload-artifact@v1
         with:
