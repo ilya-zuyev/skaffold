@@ -75,7 +75,7 @@ jobs:
 
       - name: Compare benchmarks
         run: |
-          benchstat -delta-test none -html bench_master/benchmark bench_branch/benchmark > benchdelta.html
+          benchstat -delta-test none -html bench_master/benchmark.result bench_branch/benchmark.result > benchdelta.html
 
       - uses: actions/upload-artifact@v1
         with:
