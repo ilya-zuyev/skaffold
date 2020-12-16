@@ -126,8 +126,7 @@ jobs:
 
       - name: Compare benchmarks
         run: |
-          go install github.com/golang/perf/cmd/benchstat
-          benchstat -delta-test none bench_master/benchmark.result bench_branch/benchmark.result > benchdelta.txt
+          $(dir $(shell which go))/benchstat -delta-test none bench_master/benchmark.result bench_branch/benchmark.result > benchdelta.txt
 
       - uses: actions/upload-artifact@v1
         with:
