@@ -47,7 +47,7 @@ jobs:
 
       - name: Install Minikube and start cluster
         run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.2/minikube-linux-amd64
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
           sudo install minikube /usr/local/bin/minikube
           minikube start --profile=minikube --driver=docker
       - name: Build and benchmark
@@ -93,7 +93,7 @@ jobs:
 
       - name: Install Minikube and start cluster
         run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.2/minikube-linux-amd64
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
           sudo install minikube /usr/local/bin/minikube
           minikube start --profile=minikube --driver=docker
       - name: Build and benchmark
