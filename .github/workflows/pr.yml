@@ -125,9 +125,11 @@ jobs:
           path: bench_branch/
 
       - name: Compare benchmarks
+        id: benchstat
         run: |
           go get -u golang.org/x/perf/cmd/benchstat
-          BENCHDATA=$(benchstat -html -delta-test none bench_master/benchmark.result bench_branch/benchmark.result | sed -n '/<table /,/<\/table/p')
+          BENCHSTAT=$(benchstat -html -delta-test none bench_master/benchmark.result bench_branch/benchmark.result | sed -n '/<table /,/<\/table/p')
+          echo ::set-output name=stat::$BENCHSTAT
 
       - name: comment PR
         uses: peter-evans/create-or-update-comment@v1
@@ -137,5 +139,5 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             <details><summary>show</summary>
-            ${BENCHDATA}
+            ${{ steps.benchstat.outputs.stat }}
             </details>
