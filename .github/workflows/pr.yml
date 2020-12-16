@@ -14,6 +14,15 @@ jobs:
 
   build_master:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        kustomize_version: [ 3.5.4 ]
+        ko_version: [ 0.4.0 ]
+        kompose_version: [ 1.21.0 ]
+        gcloud_sdk_version: [ 276.0.0 ]
+        container_structure_tests_version: [ 1.8.0 ]
+        minikube_version: [ 1.15.2 ]
+        integration_test_partitions: [ 0, 1, 2, 3 ]
     steps:
       - uses: actions/setup-go@v2
         with:
@@ -45,10 +54,9 @@ jobs:
           echo '{}' > /home/$(whoami)/.docker/config.json
           mkdir -p /home/$(whoami)/.m2/ && cp ./hack/maven/settings.xml /home/$(whoami)/.m2/settings.xml
 
-
       - name: Install Minikube and start cluster
         run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v${{ matrix.minikube_version }}/minikube-linux-amd64
           sudo install minikube /usr/local/bin/minikube
           minikube start --profile=minikube --driver=docker
       - name: Build and benchmark
@@ -63,6 +71,16 @@ jobs:
 
   build_branch:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        kustomize_version: [ 3.5.4 ]
+        ko_version: [ 0.4.0 ]
+        kompose_version: [ 1.21.0 ]
+        gcloud_sdk_version: [ 276.0.0 ]
+        container_structure_tests_version: [ 1.8.0 ]
+        minikube_version: [ 1.15.2 ]
+        integration_test_partitions: [ 0, 1, 2, 3 ]
+
     steps:
       - uses: actions/setup-go@v2
         with:
@@ -94,7 +112,7 @@ jobs:
 
       - name: Install Minikube and start cluster
         run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v${{ matrix.minikube_version }}/minikube-linux-amd64
           sudo install minikube /usr/local/bin/minikube
           minikube start --profile=minikube --driver=docker
       - name: Build and benchmark
