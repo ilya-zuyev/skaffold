@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/docker/docker/pkg/ioutils"
 )
@@ -31,6 +32,7 @@ func BenchmarkRender(b *testing.B) {
 	cmd.Stderr = os.Stderr
 
 	for i := 0; i < b.N; i++ {
+		time.Sleep(500 * time.Millisecond)
 		err := cmd.Run()
 		if err != nil {
 			b.Errorf("failed to run skaffold: %v", err)
