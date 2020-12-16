@@ -25,6 +25,27 @@ jobs:
           ref: master
       - name: Download Dependencies
         run: go mod download
+
+      - name: Install GCloud
+        run: |
+          wget -O gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${{ matrix.gcloud_sdk_version }}-linux-x86_64.tar.gz
+          sudo tar -xvf gcloud.tar.gz -C /
+          sudo CLOUDSDK_PYTHON="python2.7" /google-cloud-sdk/install.sh --usage-reporting=false --bash-completion=false --disable-installation-options
+          echo "/google-cloud-sdk/bin" >> $GITHUB_PATH
+
+      - name: Configure GCloud with Docker
+        run: sudo gcloud auth configure-docker
+
+      - name: Setup other files and permissions
+        run: |
+          sudo chown $(whoami) /home/$(whoami)/.config/gcloud -R
+          sudo chmod g+rw /home/$(whoami)/.config/gcloud -R
+          sudo chown $(whoami):docker /home/$(whoami)/.docker -R
+          sudo chmod g+rw /home/$(whoami)/.docker -R
+          echo '{}' > /home/$(whoami)/.docker/config.json
+          mkdir -p /home/$(whoami)/.m2/ && cp ./hack/maven/settings.xml /home/$(whoami)/.m2/settings.xml
+
+
       - name: Install Minikube and start cluster
         run: |
           curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
@@ -51,6 +72,26 @@ jobs:
         uses: actions/checkout@v2
       - name: Download Dependencies
         run: go mod download
+
+      - name: Install GCloud
+        run: |
+          wget -O gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${{ matrix.gcloud_sdk_version }}-linux-x86_64.tar.gz
+          sudo tar -xvf gcloud.tar.gz -C /
+          sudo CLOUDSDK_PYTHON="python2.7" /google-cloud-sdk/install.sh --usage-reporting=false --bash-completion=false --disable-installation-options
+          echo "/google-cloud-sdk/bin" >> $GITHUB_PATH
+
+      - name: Configure GCloud with Docker
+        run: sudo gcloud auth configure-docker
+
+      - name: Setup other files and permissions
+        run: |
+          sudo chown $(whoami) /home/$(whoami)/.config/gcloud -R
+          sudo chmod g+rw /home/$(whoami)/.config/gcloud -R
+          sudo chown $(whoami):docker /home/$(whoami)/.docker -R
+          sudo chmod g+rw /home/$(whoami)/.docker -R
+          echo '{}' > /home/$(whoami)/.docker/config.json
+          mkdir -p /home/$(whoami)/.m2/ && cp ./hack/maven/settings.xml /home/$(whoami)/.m2/settings.xml
+
       - name: Install Minikube and start cluster
         run: |
           curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64
@@ -64,7 +105,6 @@ jobs:
         with:
           name: skaffold_branch
           path: out/
-
 
   benchmark:
     needs: [build_branch, build_master]
@@ -87,6 +127,7 @@ jobs:
 
       - name: Compare benchmarks
         run: |
+          go install github.com/golang/perf/cmd/benchstat
           benchstat -delta-test none bench_master/benchmark.result bench_branch/benchmark.result > benchdelta.txt
 
       - uses: actions/upload-artifact@v1
