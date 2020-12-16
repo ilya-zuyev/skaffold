@@ -33,7 +33,7 @@ func BenchmarkRender(b *testing.B) {
 		cmd.Stdout = &ioutils.NopWriter{}
 		cmd.Stderr = os.Stderr
 
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(3000 * time.Millisecond)
 		err := cmd.Run()
 		if err != nil {
 			b.Errorf("failed to run skaffold: %v", err)
