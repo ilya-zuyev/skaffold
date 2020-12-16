@@ -116,7 +116,7 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: skaffold_branch
+          name: skaffold_master
           path: bench_master/
 
       - uses: actions/download-artifact@v2
@@ -127,16 +127,14 @@ jobs:
       - name: Compare benchmarks
         run: |
           go get -u golang.org/x/perf/cmd/benchstat
-          benchstat -html -delta-test none bench_master/benchmark.result bench_branch/benchmark.result | sed -n '/<table /,/<\/table/p' > benchdelta.html
-
-      - uses: actions/upload-artifact@v1
-        with:
-          name: benchdelta
-          path: benchdelta.html
+          BENCHDATA=$(benchstat -html -delta-test none bench_master/benchmark.result bench_branch/benchmark.result | sed -n '/<table /,/<\/table/p')
 
       - name: comment PR
-        uses: machine-learning-apps/pr-comment@master
+        uses: peter-evans/create-or-update-comment@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: benchdelta.html
+          body: |
+            <details><summary>show</summary>
+            ${BENCHDATA}
+            </details>
