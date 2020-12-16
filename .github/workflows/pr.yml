@@ -136,6 +136,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          comment-author: 'perf-bot'
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             <details><summary>show</summary>
