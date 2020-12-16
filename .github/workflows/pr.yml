@@ -127,16 +127,16 @@ jobs:
       - name: Compare benchmarks
         run: |
           go get -u golang.org/x/perf/cmd/benchstat
-          benchstat -delta-test none bench_master/benchmark.result bench_branch/benchmark.result > benchdelta.txt
+          benchstat -html -delta-test none bench_master/benchmark.result bench_branch/benchmark.result > benchdelta.html
 
       - uses: actions/upload-artifact@v1
         with:
           name: benchdelta
-          path: benchdelta.txt
+          path: benchdelta.html
 
       - name: comment PR
         uses: machine-learning-apps/pr-comment@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: benchdelta.txt
+          path: benchdelta.html
