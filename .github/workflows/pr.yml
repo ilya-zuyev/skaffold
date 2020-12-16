@@ -14,15 +14,6 @@ jobs:
 
   build_master:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        kustomize_version: [ 3.5.4 ]
-        ko_version: [ 0.4.0 ]
-        kompose_version: [ 1.21.0 ]
-        gcloud_sdk_version: [ 276.0.0 ]
-        container_structure_tests_version: [ 1.8.0 ]
-        minikube_version: [ 1.15.2 ]
-        integration_test_partitions: [ 0, 1, 2, 3 ]
     steps:
       - uses: actions/setup-go@v2
         with:
@@ -37,7 +28,7 @@ jobs:
 
       - name: Install GCloud
         run: |
-          wget -O gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${{ matrix.gcloud_sdk_version }}-linux-x86_64.tar.gz
+          wget -O gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-276.0.0-linux-x86_64.tar.gz
           sudo tar -xvf gcloud.tar.gz -C /
           sudo CLOUDSDK_PYTHON="python2.7" /google-cloud-sdk/install.sh --usage-reporting=false --bash-completion=false --disable-installation-options
           echo "/google-cloud-sdk/bin" >> $GITHUB_PATH
@@ -56,7 +47,7 @@ jobs:
 
       - name: Install Minikube and start cluster
         run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v${{ matrix.minikube_version }}/minikube-linux-amd64
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.2/minikube-linux-amd64
           sudo install minikube /usr/local/bin/minikube
           minikube start --profile=minikube --driver=docker
       - name: Build and benchmark
@@ -71,16 +62,6 @@ jobs:
 
   build_branch:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        kustomize_version: [ 3.5.4 ]
-        ko_version: [ 0.4.0 ]
-        kompose_version: [ 1.21.0 ]
-        gcloud_sdk_version: [ 276.0.0 ]
-        container_structure_tests_version: [ 1.8.0 ]
-        minikube_version: [ 1.15.2 ]
-        integration_test_partitions: [ 0, 1, 2, 3 ]
-
     steps:
       - uses: actions/setup-go@v2
         with:
@@ -93,7 +74,7 @@ jobs:
 
       - name: Install GCloud
         run: |
-          wget -O gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${{ matrix.gcloud_sdk_version }}-linux-x86_64.tar.gz
+          wget -O gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-276.0.0-linux-x86_64.tar.gz
           sudo tar -xvf gcloud.tar.gz -C /
           sudo CLOUDSDK_PYTHON="python2.7" /google-cloud-sdk/install.sh --usage-reporting=false --bash-completion=false --disable-installation-options
           echo "/google-cloud-sdk/bin" >> $GITHUB_PATH
@@ -112,7 +93,7 @@ jobs:
 
       - name: Install Minikube and start cluster
         run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v${{ matrix.minikube_version }}/minikube-linux-amd64
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.2/minikube-linux-amd64
           sudo install minikube /usr/local/bin/minikube
           minikube start --profile=minikube --driver=docker
       - name: Build and benchmark
