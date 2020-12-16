@@ -127,7 +127,7 @@ jobs:
       - name: Compare benchmarks
         run: |
           go get -u golang.org/x/perf/cmd/benchstat
-          benchstat -html -delta-test none bench_master/benchmark.result bench_branch/benchmark.result > benchdelta.html
+          benchstat -html -delta-test none bench_master/benchmark.result bench_branch/benchmark.result | sed -n '/<table /,/<\/table/p' > benchdelta.html
 
       - uses: actions/upload-artifact@v1
         with:
