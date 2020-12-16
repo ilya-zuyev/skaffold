@@ -25,13 +25,14 @@ func BenchmarkRender(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to process path: %v", err)
 	}
-	cmd := exec.Command(filepath.Join(skRoot, *skaffoldBinary), "render")
-
-	cmd.Dir = filepath.Join(skRoot, *testProj)
-	cmd.Stdout = &ioutils.NopWriter{}
-	cmd.Stderr = os.Stderr
 
 	for i := 0; i < b.N; i++ {
+		cmd := exec.Command(filepath.Join(skRoot, *skaffoldBinary), "render")
+
+		cmd.Dir = filepath.Join(skRoot, *testProj)
+		cmd.Stdout = &ioutils.NopWriter{}
+		cmd.Stderr = os.Stderr
+
 		time.Sleep(500 * time.Millisecond)
 		err := cmd.Run()
 		if err != nil {
@@ -45,13 +46,14 @@ func BenchmarkBuild(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to process path: %v", err)
 	}
-	cmd := exec.Command(filepath.Join(skRoot, *skaffoldBinary), "build")
-
-	cmd.Dir = filepath.Join(skRoot, *testProj)
-	cmd.Stdout = &ioutils.NopWriter{}
-	cmd.Stderr = os.Stderr
 
 	for i := 0; i < b.N; i++ {
+		cmd := exec.Command(filepath.Join(skRoot, *skaffoldBinary), "build")
+
+		cmd.Dir = filepath.Join(skRoot, *testProj)
+		cmd.Stdout = &ioutils.NopWriter{}
+		cmd.Stderr = os.Stderr
+
 		err := cmd.Run()
 		if err != nil {
 			b.Errorf("failed to run skaffold: %v", err)
@@ -64,13 +66,14 @@ func BenchmarkDeploy(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to process path: %v", err)
 	}
-	cmd := exec.Command(filepath.Join(skRoot, *skaffoldBinary), "deploy", "-t", "foo")
-
-	cmd.Dir = filepath.Join(skRoot, *testProj)
-	cmd.Stdout = &ioutils.NopWriter{}
-	cmd.Stderr = os.Stderr
 
 	for i := 0; i < b.N; i++ {
+		cmd := exec.Command(filepath.Join(skRoot, *skaffoldBinary), "deploy", "-t", "foo")
+
+		cmd.Dir = filepath.Join(skRoot, *testProj)
+		cmd.Stdout = &ioutils.NopWriter{}
+		cmd.Stderr = os.Stderr
+
 		err := cmd.Run()
 		if err != nil {
 			b.Errorf("failed to run skaffold: %v", err)
