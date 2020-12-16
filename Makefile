@@ -285,5 +285,3 @@ $(STATIK_FILES): go.mod docs/content/en/schemas/*
 .PHONY: benchmark
 benchmark: $(BUILD_DIR)/$(PROJECT)
 	go test -bench=. ./pkg/skaffold/perf/... -dir=$(shell pwd) -binary="out/skaffold" | tee $(BUILD_DIR)/benchmark.result
-
-
