@@ -87,7 +87,7 @@ func BenchmarkDeploy(b *testing.B) {
 	}
 }
 
-func BenchmarkFoo(b *testing.B) {
+func BenchmarkInitInternal(b *testing.B) {
 	skRoot, err := filepath.Abs(*skDir)
 	if err != nil {
 		b.Fatalf("failed to process path: %v", err)
@@ -119,6 +119,7 @@ func BenchmarkFoo(b *testing.B) {
 			BuildpacksBuilder: "gcr.io/buildpacks/builder:v1",
 			Opts: sc.SkaffoldOptions{
 				Force:             true,
+				Muted:             sc.Muted{Phases: []string{"all"}},
 				ConfigurationFile: tmpCfg.Name(),
 			},
 		}
