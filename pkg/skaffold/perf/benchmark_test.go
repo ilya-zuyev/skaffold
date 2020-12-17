@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/ioutils"
+	"github.com/sirupsen/logrus"
 
 	sc "github.com/GoogleContainerTools/skaffold/pkg/skaffold/config"
 	"github.com/GoogleContainerTools/skaffold/pkg/skaffold/initializer"
@@ -23,6 +24,7 @@ var skaffoldBinary = flag.String("binary", "skaffold", "Skaffold binary to run")
 
 func TestMain(m *testing.M) {
 	flag.Parse()
+	logrus.SetLevel(logrus.PanicLevel)
 	os.Exit(m.Run())
 }
 
